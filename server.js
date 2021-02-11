@@ -1,4 +1,5 @@
 require('dotenv').config();
+
 const express = require('express');
 const layouts = require('express-ejs-layouts');
 const app = express();
@@ -10,6 +11,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(__dirname + '/public'));
 app.use(layouts);
 
+// Routes 
+app.use('/auth', require('./routes/auth'));
+
 app.get('/', (req, res) => {
   res.render('index');
 });
@@ -17,8 +21,6 @@ app.get('/', (req, res) => {
 app.get('/profile', (req, res) => {
   res.render('profile');
 });
-
-app.use('/auth', require('./routes/auth'));
 
 
 const PORT = process.env.PORT || 3000;
