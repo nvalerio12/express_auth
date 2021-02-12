@@ -51,7 +51,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/profile', isLoggedIn, (req, res) => {
-  res.render('profile');
+  const { id, name, email } = req.user.get(); 
+  res.render('profile', { id, name, email });
 });
 
 const PORT = process.env.PORT || 3000;
