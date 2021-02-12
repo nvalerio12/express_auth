@@ -9,8 +9,9 @@ const flash = require('connect-flash');
 const app = express();
 app.set('view engine', 'ejs');
 
-// Secret Session here
+// Session 
 const SECRET_SESSION = process.env.SECRET_SESSION;
+const isLoggedIn = require('./middleware/isLoggedIn');
 
 // MIDDLEWARE
 app.use(require('morgan')('dev'));
@@ -49,7 +50,7 @@ app.get('/', (req, res) => {
   res.render('index');
 });
 
-app.get('/profile', (req, res) => {
+app.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 
@@ -59,3 +60,4 @@ const server = app.listen(PORT, () => {
 });
 
 module.exports = server;
+

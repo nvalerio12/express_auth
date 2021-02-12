@@ -1,48 +1,65 @@
 const express = require('express');
-const passport = require('passport');
-const db = require('../models');
+const passport = require('../config/ppConfig');
 const router = express.Router();
 
-
-//import DB
+// import database
 const db = require('../models');
 
 router.get('/signup', (req, res) => {
-  res.render('auth/signup');// This is a form
+  res.render('auth/signup'); // this is a form
 });
 
 router.get('/login', (req, res) => {
-  res.render('auth/login');// This is a form
+  res.render('auth/login'); // this is a form
 });
+
+router.get('/logout', (req, res) => {
+  req.logOut(); // logs the user out of the session
+  req.flash('success', 'Logging out... See you next time!');
+  res.redirect('/');
+});
+
 
 // What routes do we need (post routes)
 router.post('/signup', (req, res) => {
-  // We now have access to user info via(req.body)
-  const {email, name, password} = req.body; // Goes and gives us access to whatever key/value inside of the object(req.body)
+  // we now have access to the user info (req.body);
+  // console.log(req.body);
+  const { email, name, password } = req.body; // goes and us access to whatever key/value inside of the object (req.body)
   db.user.findOrCreate({
-    where: { email }, 
+    where: { email },
     defaults: { name, password }
   })
   .then(([user, created]) => {
-    if(created) {
-      // if created, success (means user was created) gets redirrect to homepage
+    if (created) {
+      // if created, success and we will redirect back to / page
       console.log(`${user.name} was created....`);
-      //Flash message
+      // flash messages
       const successObject = {
         successRedirect: '/',
-        successFlash: `Welcome ${user.name}. Account was created and logging in....`
+        successFlash: `Welcome ${user.name}. Account was created and logging in...`
       }
-      // Passport authenticate
-      passport.authenticate('local', successObject);
+      // passport authenicate
+      passport.authenticate('local', successObject)(req, res);
     } else {
-      // This where we get user already exists
+      // Send back email already exists
       req.flash('error', 'Email already exists');
       res.redirect('/auth/signup');
     }
   })
-.catch(error => {
-  console.log(error);
-  req.flash(`erro`, `Either email or password is incorrect. Please try again.`)
-})
+  .catch(error => {
+    console.log('**************Error');
+    console.log(error);
+    req.flash('error', 'Either email or password is incorrect. Please try again.');
+    res.redirect('/auth/signup');
+  });
+});
+
+router.post('/login', passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/auth/login',
+  successFlash: 'Welcome back ...',
+  failureFlash: 'Either email or password is incorrect' 
+}));
+
 
 module.exports = router;
